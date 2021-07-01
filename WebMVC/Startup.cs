@@ -26,11 +26,13 @@ namespace WebMVC
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddHttpClient<IProductService, ProductService>();
+            services.AddHttpClient();
             Constants.ProductAPIBase = Configuration["ServiceUrls:ProductAPI"];
             Constants.ShoppingCartAPIBase = Configuration["ServiceUrls:ShoppingCartAPI"];
+            Constants.CouponAPIBase = Configuration["ServiceUrls:CouponAPI"];
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICartService, CartService>();
+            services.AddScoped<ICouponService, CouponService>();
             services.AddControllersWithViews();
 
             services.AddAuthentication(options =>

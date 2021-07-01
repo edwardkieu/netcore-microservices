@@ -4,7 +4,6 @@ using ShoppingCartAPI.DbContexts;
 using ShoppingCartAPI.Models;
 using ShoppingCartAPI.Models.Dto;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
