@@ -39,6 +39,7 @@ namespace Product.API.Controllers
             return Ok(_response);
         }
 
+        [AllowAnonymous]
         [HttpGet]
         [Route("{id}")]
         public async Task<IActionResult> Get(int id)

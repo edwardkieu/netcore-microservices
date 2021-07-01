@@ -28,8 +28,9 @@ namespace WebMVC
         {
             services.AddHttpClient<IProductService, ProductService>();
             Constants.ProductAPIBase = Configuration["ServiceUrls:ProductAPI"];
+            Constants.ShoppingCartAPIBase = Configuration["ServiceUrls:ShoppingCartAPI"];
             services.AddScoped<IProductService, ProductService>();
-
+            services.AddScoped<ICartService, CartService>();
             services.AddControllersWithViews();
 
             services.AddAuthentication(options =>

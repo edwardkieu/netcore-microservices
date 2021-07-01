@@ -1,4 +1,9 @@
 ﻿<ul class="navbar-nav">
+    <li class="nav-item pt-lg-1">
+        <a class="nav-link" asp-controller="Cart" asp-action="CartIndex">
+            <i class="fas fa-shopping-cart"></i>
+        </a>
+    </li>
     @if (User.Identity.IsAuthenticated)
     {
         <li class="nav-item">
