@@ -22,6 +22,7 @@ namespace WebMVC.Controllers
             _logger = logger;
         }
 
+        [Authorize]
         public async Task<IActionResult> ProductIndex()
         {
             var list = new List<ProductDto>();
@@ -34,11 +35,14 @@ namespace WebMVC.Controllers
             return View(list);
         }
 
+        [Authorize]
         public async Task<IActionResult> ProductCreate()
         {
             var model = await Task.FromResult(new ProductDto());
-            return View();
+            return View(model);
         }
+
+        [Authorize(Roles = Constants.Admin)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ProductCreate(ProductDto model)
@@ -67,6 +71,7 @@ namespace WebMVC.Controllers
             return NotFound();
         }
 
+        [Authorize(Roles = Constants.Admin)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ProductEdit(ProductDto model)
@@ -83,7 +88,7 @@ namespace WebMVC.Controllers
             return View(model);
         }
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = Constants.Admin)]
         public async Task<IActionResult> ProductDelete(int productId)
         {
             var accessToken = await HttpContext.GetTokenAsync("access_token");
@@ -97,7 +102,7 @@ namespace WebMVC.Controllers
         }
 
         [HttpPost]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = Constants.Admin)]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ProductDelete(ProductDto model)
         {

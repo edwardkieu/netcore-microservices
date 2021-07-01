@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Product.API.Dtos;
 using Product.API.Repository;
 using System;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace Product.API.Controllers
 {
+    [Authorize]
     [Route("api/products")]
     public class ProductAPIController : ControllerBase
     {
