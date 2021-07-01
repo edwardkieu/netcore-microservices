@@ -21,6 +21,7 @@ namespace Product.API.Controllers
             _response = new ResponseDto();
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> Get()
         {

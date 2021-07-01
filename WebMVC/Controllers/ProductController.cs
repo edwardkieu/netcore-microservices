@@ -22,7 +22,6 @@ namespace WebMVC.Controllers
             _logger = logger;
         }
 
-        [Authorize]
         public async Task<IActionResult> ProductIndex()
         {
             var list = new List<ProductDto>();
