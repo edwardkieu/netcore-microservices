@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace OrderAPI.Messaging
+namespace OrderAPI.AzureServiceBusMessaging
 {
     public interface IAzureServiceBusConsumer
     {
