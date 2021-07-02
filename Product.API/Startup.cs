@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -9,9 +8,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using Product.API.AutoMapper;
-using Product.API.DbContexts;
-using Product.API.Repository;
+using Product.Application;
+using Product.Infrastructure;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -37,12 +35,10 @@ namespace Product.API
                 opt.SerializerSettings.DateFormatHandling = DateFormatHandling.IsoDateFormat;
             })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
-            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-            services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
-            services.AddScoped<IProductRepository, ProductRepository>();
-            services.AddControllers();
+            services.AddApplicationLayer();
+            services.AddPersistenceInfrastructure(Configuration);
 
-            //https://localhost:44388
+            
             services.AddAuthentication("Bearer")
                 .AddJwtBearer("Bearer", options =>
                 {

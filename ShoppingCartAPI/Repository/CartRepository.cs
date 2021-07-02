@@ -149,7 +149,7 @@ namespace ShoppingCartAPI.Repository
                 await _db.SaveChangesAsync();
                 return true;
             }
-            catch(Exception ex)
+            catch
             {
                 return false;
             }

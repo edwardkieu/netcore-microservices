@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using ShoppingCartAPI.Models.Dto;
 using System;
 using System.Net.Http;
@@ -9,10 +10,15 @@ namespace ShoppingCartAPI.Repository
     public class CouponRepository : ICouponRepository
     {
         private readonly HttpClient _client;
+        private readonly IConfiguration _configuration;
 
-        public CouponRepository(HttpClient client)
+        public CouponRepository(IConfiguration configuration)
         {
-            _client = client;
+            _configuration = configuration;
+            _client = new HttpClient 
+            { 
+                BaseAddress = new Uri(_configuration.GetSection("ServiceUrls:CouponAPI").Value)
+            };
         }
 
         public async Task<CouponDto> GetCoupon(string couponName)

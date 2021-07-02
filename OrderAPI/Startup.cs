@@ -28,6 +28,7 @@ namespace OrderAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddOptions();
+            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<IOrderRepository, OrderRepository>();
             var optionBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();

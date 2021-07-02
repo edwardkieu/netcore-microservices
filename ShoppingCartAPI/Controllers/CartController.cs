@@ -9,7 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Mango.Services.ShoppingCartAPI.Controllers
+namespace ShoppingCartAPI.Controllers
 {
     [ApiController]
     [Route("api/cart")]

@@ -31,6 +31,7 @@ namespace ShoppingCartAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddOptions();
+            services.AddHttpClient();
             services.AddControllers().AddNewtonsoftJson(opt =>
             {
                 opt.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
@@ -43,10 +44,10 @@ namespace ShoppingCartAPI
             services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
             services.AddScoped<ICartRepository, CartRepository>();
             services.AddScoped<IMessageBusService, MessageBusService>();
+            //services.AddHttpClient<ICouponRepository, CouponRepository>(u => u.BaseAddress = new Uri(Configuration["ServiceUrls:CouponAPI"]));
             services.AddScoped<ICouponRepository, CouponRepository>();
             services.Configure<ServiceBusSettings>(Configuration.GetSection("ServiceBusSettings"));
-            services.AddHttpClient<ICouponRepository, CouponRepository>(u => u.BaseAddress = new Uri(Configuration["ServiceUrls:CouponAPI"]));
-            services.AddControllers();
+            
             services.AddSingleton(Configuration);
             //https://localhost:44388
             services.AddAuthentication("Bearer")

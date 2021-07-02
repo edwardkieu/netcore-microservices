@@ -89,7 +89,7 @@ namespace WebMVC.Controllers
                 }
                 return RedirectToAction(nameof(Confirmation));
             }
-            catch(Exception e)
+            catch
             {
                 return View(cartDto);
             }

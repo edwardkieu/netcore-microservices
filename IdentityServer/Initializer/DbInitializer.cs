@@ -2,10 +2,8 @@
 using IdentityServer.DbContexts;
 using IdentityServer.Services.Identity.Models;
 using Microsoft.AspNetCore.Identity;
-using System;
 using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace IdentityServer.Initializer
 {

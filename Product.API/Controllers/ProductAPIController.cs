@@ -1,42 +1,27 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Product.API.Dtos;
-using Product.API.Repository;
-using System;
-using System.Collections.Generic;
+using Product.Application.Features.Products.Commands.CreateProduct;
+using Product.Application.Features.Products.Commands.DeleteProductById;
+using Product.Application.Features.Products.Commands.UpdateProduct;
+using Product.Application.Features.Products.Queries.GetAllProducts;
+using Product.Application.Features.Products.Queries.GetProductById;
 using System.Threading.Tasks;
 
 namespace Product.API.Controllers
 {
     [Authorize]
     [Route("api/products")]
-    public class ProductAPIController : ControllerBase
+    public class ProductAPIController : BaseApiController
     {
-        protected ResponseDto _response;
-        private readonly IProductRepository _productRepository;
-
-        public ProductAPIController(IProductRepository productRepository)
+        public ProductAPIController() :base()
         {
-            _productRepository = productRepository;
-            _response = new ResponseDto();
         }
 
         [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            try
-            {
-                var productDtos = await _productRepository.GetProducts();
-                _response.Result = productDtos;
-            }
-            catch (Exception ex)
-            {
-                _response.IsSuccess = false;
-                _response.ErrorMessages
-                     = new List<string>() { ex.ToString() };
-            }
-            return Ok(_response);
+            return Ok(await Mediator.Send(new GetProductsQuery()));
         }
 
         [AllowAnonymous]
@@ -44,72 +29,32 @@ namespace Product.API.Controllers
         [Route("{id}")]
         public async Task<IActionResult> Get(int id)
         {
-            try
-            {
-                var productDto = await _productRepository.GetProductById(id);
-                _response.Result = productDto;
-            }
-            catch (Exception ex)
-            {
-                _response.IsSuccess = false;
-                _response.ErrorMessages
-                     = new List<string>() { ex.ToString() };
-            }
-            return Ok(_response);
+            return Ok(await Mediator.Send(new GetProductByIdQuery { Id = id }));
         }
 
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] BookDto productDto)
+        public async Task<IActionResult> Post([FromBody] CreateProductCommand command)
         {
-            try
-            {
-                var model = await _productRepository.CreateUpdateProduct(productDto);
-                _response.Result = model;
-            }
-            catch (Exception ex)
-            {
-                _response.IsSuccess = false;
-                _response.ErrorMessages
-                     = new List<string>() { ex.ToString() };
-            }
-            return Ok(_response);
+            return Ok(await Mediator.Send(command));
         }
 
 
-        [HttpPut]
-        public async Task<IActionResult> Put([FromBody] BookDto productDto)
+        [HttpPut("{ProductId}")]
+        public async Task<IActionResult> Put(int ProductId, UpdateProductCommand command)
         {
-            try
+            if (ProductId != command.ProductId)
             {
-                var model = await _productRepository.CreateUpdateProduct(productDto);
-                _response.Result = model;
+                return BadRequest();
             }
-            catch (Exception ex)
-            {
-                _response.IsSuccess = false;
-                _response.ErrorMessages
-                     = new List<string>() { ex.ToString() };
-            }
-            return Ok(_response);
+            return Ok(await Mediator.Send(command));
         }
 
         [HttpDelete]
-        [Route("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [Route("{ProductId}")]
+        public async Task<IActionResult> Delete(int ProductId)
         {
-            try
-            {
-                bool isSuccess = await _productRepository.DeleteProduct(id);
-                _response.Result = isSuccess;
-            }
-            catch (Exception ex)
-            {
-                _response.IsSuccess = false;
-                _response.ErrorMessages
-                     = new List<string>() { ex.ToString() };
-            }
-            return Ok(_response);
+            return Ok(await Mediator.Send(new DeleteProductByIdCommand { Id = ProductId }));
         }
     }
 }

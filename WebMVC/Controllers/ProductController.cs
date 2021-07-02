@@ -41,7 +41,7 @@ namespace WebMVC.Controllers
             return View(model);
         }
 
-        [Authorize(Roles = Constants.Admin)]
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ProductCreate(ProductDto model)
@@ -70,7 +70,7 @@ namespace WebMVC.Controllers
             return NotFound();
         }
 
-        [Authorize(Roles = Constants.Admin)]
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ProductEdit(ProductDto model)
@@ -87,7 +87,7 @@ namespace WebMVC.Controllers
             return View(model);
         }
 
-        [Authorize(Roles = Constants.Admin)]
+        [Authorize]
         public async Task<IActionResult> ProductDelete(int productId)
         {
             var accessToken = await HttpContext.GetTokenAsync("access_token");
@@ -101,7 +101,7 @@ namespace WebMVC.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = Constants.Admin)]
+        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ProductDelete(ProductDto model)
         {
