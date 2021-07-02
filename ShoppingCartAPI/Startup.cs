@@ -42,12 +42,12 @@ namespace ShoppingCartAPI
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
             services.AddScoped<ICartRepository, CartRepository>();
-            services.AddScoped<IMessageBusService, MessageBusService>();
             services.AddScoped<ICouponRepository, CouponRepository>();
+            services.AddScoped<IMessageBusService, MessageBusService>();
             services.Configure<ServiceBusSettings>(Configuration.GetSection("ServiceBusSettings"));
-            services.AddHttpClient<ICouponRepository, CouponRepository>(u => u.BaseAddress = new Uri(Configuration["ServiceUrls:CouponAPI"]));
-            services.AddControllers();
             services.AddSingleton(Configuration);
+            //services.AddHttpClient<ICouponRepository, CouponRepository>(u => u.BaseAddress = new Uri(Configuration["ServiceUrls:CouponAPI"]));
+            
             //https://localhost:44388
             services.AddAuthentication("Bearer")
                 .AddJwtBearer("Bearer", options =>

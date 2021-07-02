@@ -2,13 +2,17 @@ using AzureServiceBus.Implementaions;
 using AzureServiceBus.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using OrderAPI.DbContexts;
-using OrderAPI.Messaging;
+using OrderAPI.Extensions;
+using OrderAPI.AzureServiceBusMessaging;
 using OrderAPI.Repository;
 using OrderAPI.Settings;
 using System;
@@ -28,15 +32,20 @@ namespace OrderAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddOptions();
+            services.AddControllers().AddNewtonsoftJson(opt =>
+            {
+                opt.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                opt.SerializerSettings.NullValueHandling = NullValueHandling.Include;
+                opt.SerializerSettings.DateFormatHandling = DateFormatHandling.IsoDateFormat;
+            }).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            services.AddSingleton(Configuration);
+            services.Configure<ServiceBusSettings>(Configuration.GetSection("ServiceBusSettings"));
+            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<IOrderRepository, OrderRepository>();
-            var optionBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-            optionBuilder.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
             services.AddScoped<IMessageBusService, MessageBusService>();
-            services.AddSingleton(new OrderRepository(optionBuilder.Options));
-            services.Configure<ServiceBusSettings>(Configuration.GetSection("ServiceBusSettings"));
-            services.AddSingleton<IAzureServiceBusConsumer, AzureServiceBusConsumer>();
-            services.AddControllers();
+            services.AddScoped<IAzureServiceBusConsumer, AzureServiceBusConsumer>();
 
             services.AddAuthentication("Bearer")
                 .AddJwtBearer("Bearer", options =>
@@ -76,6 +85,8 @@ namespace OrderAPI
             {
                 endpoints.MapControllers();
             });
+
+            app.UseAzureServiceBusConsumer();
         }
     }
 }

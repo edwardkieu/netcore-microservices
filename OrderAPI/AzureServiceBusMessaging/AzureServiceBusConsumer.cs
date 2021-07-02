@@ -1,6 +1,5 @@
 ﻿using Azure.Messaging.ServiceBus;
 using AzureServiceBus.Interfaces;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using OrderAPI.Messages;
@@ -12,29 +11,22 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OrderAPI.Messaging
+namespace OrderAPI.AzureServiceBusMessaging
 {
     public class AzureServiceBusConsumer : IAzureServiceBusConsumer
     {
-        private readonly OrderRepository _orderRepository;
+        private readonly IOrderRepository _orderRepository;
 
-        private ServiceBusProcessor checkOutProcessor;
-        private ServiceBusProcessor orderUpdatePaymentStatusProcessor;
-
-        private readonly IConfiguration _configuration;
-        private readonly IMessageBusService _messageBus;
+        private readonly ServiceBusProcessor checkOutProcessor;
 
         private readonly ServiceBusSettings _serviceBusSettings;
 
-        public AzureServiceBusConsumer(OrderRepository orderRepository, IConfiguration configuration, IMessageBusService messageBus, IOptions<ServiceBusSettings> serviceBusSettings)
+        public AzureServiceBusConsumer(IOrderRepository orderRepository, IOptions<ServiceBusSettings> serviceBusSettings)
         {
             _orderRepository = orderRepository;
-            _configuration = configuration;
-            _messageBus = messageBus;
             _serviceBusSettings = serviceBusSettings.Value;
             var client = new ServiceBusClient(_serviceBusSettings.ConnectionString);
-            checkOutProcessor = client.CreateProcessor(_serviceBusSettings.CheckoutMessageTopic);
-            orderUpdatePaymentStatusProcessor = client.CreateProcessor(_serviceBusSettings.OrderUpdatePaymentResultTopic, _serviceBusSettings.SubscriptionCheckOut);
+            checkOutProcessor = client.CreateProcessor(_serviceBusSettings.CheckoutQueue);
         }
 
         public async Task Start()
@@ -42,18 +34,11 @@ namespace OrderAPI.Messaging
             checkOutProcessor.ProcessMessageAsync += OnCheckOutMessageReceived;
             checkOutProcessor.ProcessErrorAsync += ErrorHandler;
             await checkOutProcessor.StartProcessingAsync();
-
-            orderUpdatePaymentStatusProcessor.ProcessMessageAsync += OnOrderPaymentUpdateReceived;
-            orderUpdatePaymentStatusProcessor.ProcessErrorAsync += ErrorHandler;
-            await orderUpdatePaymentStatusProcessor.StartProcessingAsync();
         }
         public async Task Stop()
         {
             await checkOutProcessor.StopProcessingAsync();
             await checkOutProcessor.DisposeAsync();
-
-            await orderUpdatePaymentStatusProcessor.StopProcessingAsync();
-            await orderUpdatePaymentStatusProcessor.DisposeAsync();
         }
         Task ErrorHandler(ProcessErrorEventArgs args)
         {
@@ -101,41 +86,7 @@ namespace OrderAPI.Messaging
             }
 
             await _orderRepository.AddOrder(orderHeader);
-
-
-            PaymentRequestMessage paymentRequestMessage = new PaymentRequestMessage()
-            {
-                Name = orderHeader.FirstName + " " + orderHeader.LastName,
-                CardNumber = orderHeader.CardNumber,
-                CVV = orderHeader.CVV,
-                ExpiryMonthYear = orderHeader.ExpiryMonthYear,
-                OrderId = orderHeader.OrderHeaderId,
-                OrderTotal = orderHeader.OrderTotal,
-                Email=orderHeader.Email
-            };
-
-            try
-            {
-                await _messageBus.PublishMessage(paymentRequestMessage, _serviceBusSettings.ConnectionString, _serviceBusSettings.OrderPaymentProcessTopics);
-                await args.CompleteMessageAsync(args.Message);
-            }
-            catch(Exception ex)
-            {
-                throw ex;
-            }
-
-        }
-
-        private async Task OnOrderPaymentUpdateReceived(ProcessMessageEventArgs args)
-        {
-            var message = args.Message;
-            var body = Encoding.UTF8.GetString(message.Body);
-
-            UpdatePaymentResultMessage paymentResultMessage = JsonConvert.DeserializeObject<UpdatePaymentResultMessage>(body);
-
-            await _orderRepository.UpdateOrderPaymentStatus(paymentResultMessage.OrderId, paymentResultMessage.Status);
             await args.CompleteMessageAsync(args.Message);
-
         }
     }
 }
