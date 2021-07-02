@@ -2,21 +2,18 @@ using AzureServiceBus.Implementaions;
 using AzureServiceBus.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using ShoppingCartAPI.AutoMapper;
-using ShoppingCartAPI.DbContexts;
-using ShoppingCartAPI.Repository;
-using ShoppingCartAPI.Settings;
+using OrderAPI.DbContexts;
+using OrderAPI.Messaging;
+using OrderAPI.Repository;
+using OrderAPI.Settings;
 using System;
 
-namespace ShoppingCartAPI
+namespace OrderAPI
 {
     public class Startup
     {
@@ -31,24 +28,16 @@ namespace ShoppingCartAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddOptions();
-            services.AddControllers().AddNewtonsoftJson(opt =>
-            {
-                opt.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-                opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-                opt.SerializerSettings.NullValueHandling = NullValueHandling.Include;
-                opt.SerializerSettings.DateFormatHandling = DateFormatHandling.IsoDateFormat;
-            })
-                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
-            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-            services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
-            services.AddScoped<ICartRepository, CartRepository>();
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            services.AddScoped<IOrderRepository, OrderRepository>();
+            var optionBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+            optionBuilder.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
             services.AddScoped<IMessageBusService, MessageBusService>();
-            services.AddScoped<ICouponRepository, CouponRepository>();
+            services.AddSingleton(new OrderRepository(optionBuilder.Options));
             services.Configure<ServiceBusSettings>(Configuration.GetSection("ServiceBusSettings"));
-            services.AddHttpClient<ICouponRepository, CouponRepository>(u => u.BaseAddress = new Uri(Configuration["ServiceUrls:CouponAPI"]));
+            services.AddSingleton<IAzureServiceBusConsumer, AzureServiceBusConsumer>();
             services.AddControllers();
-            services.AddSingleton(Configuration);
-            //https://localhost:44388
+
             services.AddAuthentication("Bearer")
                 .AddJwtBearer("Bearer", options =>
                 {
