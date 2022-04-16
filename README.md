@@ -5,7 +5,7 @@ There is a couple of microservices which implemented e-commerce modules over Ide
 ![Microservices](https://docs.microsoft.com/en-us/azure/architecture/includes/images/microservices-logical.png)
 
 # Solution structure
-![Solution Picture](https://i.im.ge/2021/07/03/u6f4S.png)
+![Solution Picture](https://raw.githubusercontent.com/edwardkieu/netcore-microservices/master/src/FrontEnd/WebMVC/wwwroot/images/folder_structure.PNG)
 
 
 

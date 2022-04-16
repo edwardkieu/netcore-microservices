@@ -43,6 +43,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Product.Domain", "Services\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Product.Infrastructure", "Services\Product.MicroService\Product.Infrastructure\Product.Infrastructure.csproj", "{80B20973-7898-4B00-98E1-B05069CC9F6A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{326A881E-7B15-4894-B28C-6001A857F1B1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
